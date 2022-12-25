@@ -1,0 +1,50 @@
+library ieee;
+use ieee.std_logic_1164.all;
+
+package execute_lw_sw is
+    component exeLWSW is
+        port(I : in std_logic_vector(96 downto 0) ; clk : in std_logic ; O : out std_logic_vector(22 downto 0));
+    end component exeLWSW;
+end package execute_lw_sw;
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+library work;
+use work.dataMemory.all;
+use work.reg_26.all;
+use work.reg_39.all;
+use work.adder16.all;
+
+entity exeLWSW is
+    port(I : in std_logic_vector(107 downto 0) ; clk : in std_logic ; O : out std_logic_vector(22 downto 0), ldfw : out std_logic_vector(26 downto 0));
+end entity exeLWSW;
+
+architecture arc of exeLWSW is
+    signal addOut0, addOut1: std_logic_vector(15 downto 0);
+	 signal reg26Out : std_logic_vector(25 downto 0);
+    signal reg39Out : std_logic_vector(38 downto 0);
+    signal wen : std_logic;
+	 signal lwswOut : std_logic_vector(15 downto 0);
+begin
+    add0 : add16 port map (I(86 downto 71), I(70 downto 55), addOut0);
+    reg26_0 : reg26 port map ((I(96 downto 87)) & (addOut0), clk, reg26Out);
+    add1 : add16 port map (I(31 downto 16), I(15 downto 0), addOut1);
+    reg39_0 : reg39 port map (I(54 downto 32) & addOut1, clk, reg39Out);
+    dmem0 : dmem port map (reg26Out(15 downto 0), reg39Out(15 downto 0), reg39Out(31 downto 16), clk, wen, lwswOut(15 downto 0));
+    process(clk) is
+    begin
+	     wen <= '0';
+		  O <= reg26Out(22 downto 16) & lwswOut;
+		  
+        if(I(54 downto 48) /= "1111111") then
+            wen <= '1';
+        else
+            wen <= '0';
+		  end if;
+		  if (to_integer(unsigned(I(96 downto 90)))= 127) then
+		      ldfw <= lwswOut & I(106 downto 97) & '0';
+		  else
+		      ldfw <= lwswOut & I(106 downto 97) & '1';
+	 end process;
+end arc;
