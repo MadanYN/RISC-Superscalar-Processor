@@ -11,4 +11,4 @@ The presented processor has the following properties
 -  Store buffer to address speculative stores
 -  A FIFO re-order buffer of 127 entries for completing and retiring the instructions
 
-PS : The project contains the complete design with completed port mapping but it should be noted that the design is untested with a testbench
+PS : The repository contains the complete design with completed port mapping and the design is behaviourally correct. The design is not synthesised and timing analysis is not performed 
